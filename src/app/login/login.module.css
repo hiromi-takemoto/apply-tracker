@@ -1,0 +1,18 @@
+.page { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; }
+.container { width: min(760px, 100%); }
+.container > h1 { font-size: 2rem; }
+.lead { margin-top: 8px; color: #35453b; }
+.forms { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 28px; }
+.forms section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+.forms h2 { font-size: 1.25rem; margin-bottom: 20px; }
+.forms form { display: flex; flex-direction: column; gap: 9px; }
+.forms label { font-weight: 650; margin-top: 5px; }
+.forms input { width: 100%; border: 1px solid #59645d; border-radius: 6px; padding: 10px 12px; color: #17211b; background: #fff; }
+.forms input:focus-visible, .forms button:focus-visible { outline: 3px solid #f1b51c; outline-offset: 2px; }
+.forms button { margin-top: 10px; border: 0; border-radius: 6px; padding: 11px 16px; color: #fff; background: var(--primary); font-weight: 700; cursor: pointer; }
+.forms button:hover { background: var(--primary-hover); }
+.forms button:disabled { background: #4f6257; cursor: wait; }
+.error, .success { margin-top: 8px; border-left: 4px solid; padding: 10px 12px; font-weight: 600; line-height: 1.5; }
+.error { color: var(--danger); background: #fff1f1; border-color: var(--danger); }
+.success { color: var(--success); background: #eef9f1; border-color: var(--success); }
+@media (max-width: 650px) { .forms { grid-template-columns: 1fr; } }

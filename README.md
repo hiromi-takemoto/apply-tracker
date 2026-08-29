@@ -1,26 +1,36 @@
 # ApplyTracker
 
-クラウドソーシング案件への応募状況を記録する Next.js + Supabase アプリです。現在は1周目の前半で、DB設計と接続用の雛形まで実装しています。
+クラウドソーシング案件への応募状況を記録する Next.js + Supabase アプリです。現在は登録、ログイン、ログアウト、セッション保護とRLS統合テストまで実装しています。
 
-## 1. ソースコードと動作環境
+## 必要な環境
 
-- Next.js（App Router）/ TypeScript / React
-- PostgreSQL（Supabase）/ Supabase Auth
-- Node.js 20以上、npm 10以上を推奨
+- Node.js 20以上、npm 10以上
+- Supabaseプロジェクト
 
-リポジトリを取得し、プロジェクト直下で次を実行します。
+## セットアップ
+
+リポジトリを取得したら、プロジェクト直下で依存関係をインストールします。
 
 ```bash
 npm install
 copy .env.example .env.local
-npm run dev
 ```
 
-macOS / Linux では2行目を `cp .env.example .env.local` にしてください。ブラウザで `http://localhost:3000` を開きます。現時点のトップページは Next.js の初期画面です。
+macOS / Linuxでは2行目を `cp .env.example .env.local` にしてください。
 
-## 2. Supabaseの準備とmigration
+### 1. migrationを適用する
 
-Supabaseアカウントとプロジェクトを作成した後、プロジェクトの Settings > API で確認した値を `.env.local` に設定します。
+Supabaseでプロジェクトを作成し、ダッシュボードの **SQL Editor** を開きます。`supabase/migrations/` 内のSQLファイルをファイル名順に開き、内容をSQL Editorへ貼り付けて **Run** を押します。現在は次の1ファイルです。
+
+```text
+supabase/migrations/202608290001_initial_schema.sql
+```
+
+SQLが正常終了したことと、Table Editorに `profiles`、`applications`、`audit_logs` が作成されたことを確認してください。同じmigrationを同じDBへ二度実行すると型やテーブルの重複エラーになるため、一度だけ実行します。
+
+### 2. 環境変数を設定する
+
+Supabaseダッシュボードの **Project Settings > API**（表示名が異なる場合はConnect画面）で値を確認し、`.env.local` に設定します。
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=プロジェクトURL
@@ -28,38 +38,38 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=公開用anonキー
 SUPABASE_SERVICE_ROLE_KEY=サーバー専用service_roleキー
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` はブラウザ用コードへ渡さず、Gitにもコミットしないでください。Supabase CLI を導入・ログイン後、プロジェクトをリンクしてmigrationを適用します。
+`SUPABASE_SERVICE_ROLE_KEY` はRLS統合テストのユーザー作成と後片付けだけに使います。ブラウザへ渡したり、Gitへコミットしたりしないでください。`.env.local` はGit管理対象外です。
 
-```bash
-npx supabase link --project-ref <PROJECT_REF>
-npx supabase db push
-```
-
-DB定義は `supabase/migrations/202608290001_initial_schema.sql`、ER図は `docs/ER.md` にあります。初期データやダミーデータはありません。
-
-## 3. 操作方法
-
-画面、ユーザー登録、ログイン、ログアウト、パスワード再設定、案件CRUD、絞り込み、CSV出力、管理者画面はすべて未実装です。Supabaseクライアントは `src/lib/supabase/client.ts`（ブラウザ用）と `src/lib/supabase/server.ts`（サーバー用）に用意しています。
-
-## 4. 障害復旧
-
-- 環境変数エラー: `.env.local` の3項目を確認し、開発サーバーを再起動します。
-- 依存関係エラー: `node_modules` を削除して `npm install` を再実行します。
-- DB定義の不一致: Supabase CLI の接続先を確認して `npx supabase db push` を再実行します。本番DBを手作業で変更せず、migrationを追加してください。
-- 秘密値を誤って公開した場合: Git履歴から除くだけでなく、Supabase側で直ちにキーを再発行してください。
-
-## 5. 既知の制約・未納品項目
-
-- Supabase未接続のため、migrationのリモート適用とRLSの実動作テストは未実施です。
-- 本番URL、デモアカウント、初期データ、受入テスト表、自動テスト、CI、引き渡し手順、ライセンス一覧、検収チェックリストは未実装です。
-- Vercelへの公開は未実施です。
-- スクレイピング、統計、AI生成、チーム共有、通知、PWA、決済、ダークモード、画像、多言語対応は仕様上の対象外です。
-
-## コマンド
+### 3. 起動する
 
 ```bash
 npm run dev
+```
+
+ブラウザで `http://localhost:3000/login` を開きます。新規登録後、SupabaseのAuth設定でメール確認が有効なら、届いた確認メールのリンクを開いてからログインします。ログイン後は `/applications` に移動し、メールアドレスとログアウトボタンが表示されます。
+
+## テスト
+
+```bash
+npm test
+```
+
+RLS統合テストは、確認済みのユーザーA/Bを一時作成し、Aの案件をBが参照・更新・削除できないことと、A自身は参照できることを検証します。終了時は成功・失敗を問わず、作成した行とユーザーを削除します。必要な環境変数が未設定なら、テスト結果には失敗ではなくスキップと表示されます。
+
+品質チェックは次のコマンドで実行します。
+
+```bash
 npm run lint
 npm run build
-npm start
 ```
+
+## 障害復旧
+
+- 環境変数エラー: `.env.local` の3項目を確認し、開発サーバーを再起動します。
+- DBエラー: migrationが対象プロジェクトに適用済みか確認します。既存DBを直接変更せず、新しいmigrationを追加してください。
+- 認証エラー: SupabaseダッシュボードのAuthentication設定とユーザー一覧を確認します。
+- 秘密値を公開した場合: Git履歴から除くだけでなく、Supabase側で直ちにキーを再発行してください。
+
+## 現在の制約
+
+案件CRUD画面、パスワード再設定、管理者画面、Playwright E2E、CI、Vercel公開は今後の周で実装します。スクレイピング、統計、AI生成、チーム共有、通知、PWA、決済、ダークモード、画像、多言語対応は仕様上の対象外です。
