@@ -71,6 +71,11 @@
 | クライアント完了率 | 数値(%) | |
 | 締切 | 日付 | |
 | 状態 | 検討中 / 応募済 / 返信あり / 契約 / 不成立 / 見送り | ○ |
+
+**DBには英字キーで保存し、画面で日本語ラベルに変換する。**
+媒体 `crowdworks / lancers / coconala / other`
+状態 `considering / applied / replied / contracted / rejected / passed`
+（日本語のまま保存すると絞り込みのURLが `?status=%E5%BF%9C%E5%8B%9F%E6%B8%88` になって読めない）
 | 提案文 | 長文 | |
 | メモ（なぜ落ちたか等） | 長文 | |
 
