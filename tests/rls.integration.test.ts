@@ -78,6 +78,8 @@ integration("applications のRLS", () => {
       .select("id");
     expect(updateByB.error).toBeNull();
     expect(updateByB.data).toEqual([]);
+    const unchangedAfterUpdate = await clientA.from("applications").select("title").eq("id", applicationId!).single();
+    expect(unchangedAfterUpdate.data?.title).toBe("RLSテスト案件");
 
     const deleteByB = await clientB
       .from("applications")
@@ -86,6 +88,8 @@ integration("applications のRLS", () => {
       .select("id");
     expect(deleteByB.error).toBeNull();
     expect(deleteByB.data).toEqual([]);
+    const remainsAfterDelete = await clientA.from("applications").select("id").eq("id", applicationId!).single();
+    expect(remainsAfterDelete.data?.id).toBe(applicationId);
 
     // Bが「持ち主をAだと偽って」行を作れないこと（owner_idの詐称）
     const forgedInsert = await clientB
