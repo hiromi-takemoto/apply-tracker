@@ -22,7 +22,7 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
-  if (!user && path.startsWith("/applications")) {
+  if (!user && (path.startsWith("/applications") || path.startsWith("/admin"))) {
     return redirectWithCookies(request, response, "/login");
   }
   if (user && path === "/login") {

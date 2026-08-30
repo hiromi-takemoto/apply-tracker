@@ -20,13 +20,25 @@ macOS / Linuxでは2行目を `cp .env.example .env.local` にしてください
 
 ### 1. migrationを適用する
 
-Supabaseでプロジェクトを作成し、ダッシュボードの **SQL Editor** を開きます。`supabase/migrations/` 内のSQLファイルをファイル名順に開き、内容をSQL Editorへ貼り付けて **Run** を押します。現在は次の1ファイルです。
+Supabaseでプロジェクトを作成し、ダッシュボードの **SQL Editor** を開きます。`supabase/migrations/` 内のSQLファイルをファイル名順に開き、内容をSQL Editorへ貼り付けて **Run** を押します。既存環境も、新しく追加されたmigrationを必ず適用してください。
 
 ```text
 supabase/migrations/202608290001_initial_schema.sql
+supabase/migrations/202608300001_application_amounts_and_genres.sql
+supabase/migrations/202608300002_admin_statistics.sql
 ```
 
 SQLが正常終了したことと、Table Editorに `profiles`、`applications`、`audit_logs` が作成されたことを確認してください。同じmigrationを同じDBへ二度実行すると型やテーブルの重複エラーになるため、一度だけ実行します。
+
+### 自分を管理者にする
+
+Supabaseの **SQL Editor** で、ログインに使うメールアドレスへ置き換えて次の1行を実行します。
+
+```sql
+update public.profiles set role = 'admin' where id = (select id from auth.users where email = 'your-email@example.com');
+```
+
+反映後にログインし直すと、案件一覧に「管理者画面」が表示されます。
 
 ### 2. 環境変数を設定する
 
@@ -72,7 +84,7 @@ npm run build
 
 ## 現在の制約
 
-案件CRUD画面、パスワード再設定、管理者画面、Playwright E2E、CI、Vercel公開は今後の周で実装します。スクレイピング、統計、AI生成、チーム共有、通知、PWA、決済、ダークモード、画像、多言語対応は仕様上の対象外です。
+Playwright E2E、CI、Vercel公開は今後の周で実装します。スクレイピング、集計値以外の統計、AI生成、チーム共有、通知、PWA、決済、ダークモード、画像、多言語対応は仕様上の対象外です。
 
 ## 検証記録（1周目・2026-08-29）
 
@@ -268,3 +280,44 @@ Claudeがブラウザと実DBで、実在の募集データを使って確認し
 - 実際に届いたメールのリンクから /update-password に入って更新まで通す流れ
 - 本番公開時は Supabase の Authentication → URL Configuration に
   本番URLをリダイレクト許可として追加すること（6周目）
+
+## 検証記録（4周目後半・監査ログと管理者ロール・2026-08-30）
+
+### 監査ログ
+
+提案文とメモに `TOPSECRET_...` を含む案件を作り、作成→更新→削除まで通してログを直接確認した。
+
+| 操作 | 記録された details |
+|---|---|
+| create | `{"title":"...","platform":"lancers"}` |
+| update | `{"title":"...","platform":"lancers","changed_fields":["状態","メモ"]}` |
+| delete | `{"title":"...","platform":"lancers"}` |
+
+| 確認項目 | 結果 |
+|---|---|
+| **提案文の本文がログに含まれるか** | OK 含まれない |
+| **メモの本文がログに含まれるか** | OK 含まれない（変更前・変更後どちらも） |
+| 更新時に「何が変わったか」は分かるか | OK 項目名だけ記録（状態、メモ） |
+| 削除時に何を消したか分かるか | OK タイトルと媒体が残る |
+| /applications/history | OK 新しい順。画面にも本文は出ない |
+
+### 管理者ロール（プログラムを通さず直接検証）
+
+| 確認項目 | 結果 |
+|---|---|
+| **一般ユーザーが集計関数を直接呼ぶ** | OK 拒否 `administrator role required` |
+| 管理者が集計関数を直接呼ぶ | OK 件数だけ返る |
+| **管理者が applications を直接読む** | OK **0件**（DBには他人の案件が2件あるが見えない） |
+| 一般ユーザーが /admin を開く | OK /applications へ戻される |
+| 未ログインで /admin を開く | OK /login へ（proxy の matcher に追加済み） |
+| 管理者にだけ /admin の導線が出る | OK |
+| /admin の表示内容 | OK 利用者数・案件総数・状態ごとの件数のみ。案件名は一切出ない |
+
+### 共通
+
+| 確認項目 | 結果 |
+|---|---|
+| ビルド / lint / テスト31件 | OK 全通過 |
+| コントラスト比（/admin 24箇所・/history） | OK 基準未満0件（最低 7.86） |
+| 画面幅375px（両画面） | OK はみ出さない |
+| 検証データの後始末 | OK 検証用ユーザー2つとログを削除 |

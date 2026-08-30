@@ -35,16 +35,17 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
   if (!user) redirect("/login");
 
   const applicationsQuery = supabase.from("applications").select("id, platform, title, genre_major, genre_minor, listed_amount_min, listed_amount_max, actual_amount, status, deadline").order("created_at", { ascending: false });
-  const [{ data, error }, { count: totalCount, error: countError }] = await Promise.all([
+  const [{ data, error }, { count: totalCount, error: countError }, { data: profile }] = await Promise.all([
     applyApplicationFilters(applicationsQuery, filters),
     supabase.from("applications").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
   ]);
   const applications = (data ?? []) as Row[];
   const total = totalCount ?? 0;
   const loadError = error || countError;
 
   return <main className={styles.page}><section className={styles.panel}>
-    <header className={styles.header}><div><h1>案件一覧</h1><p>ログイン中: <strong>{user.email}</strong></p></div><div className={styles.headerActions}><Link className={styles.primaryLink} href="/applications/new">新規登録</Link><form action={logout}><button className={styles.logout} type="submit">ログアウト</button></form></div></header>
+    <header className={styles.header}><div><h1>案件一覧</h1><p>ログイン中: <strong>{user.email}</strong></p></div><div className={styles.headerActions}><Link href="/applications/history">操作履歴</Link>{profile?.role === "admin" && <Link href="/admin">管理者画面</Link>}<Link className={styles.primaryLink} href="/applications/new">新規登録</Link><form action={logout}><button className={styles.logout} type="submit">ログアウト</button></form></div></header>
     <div className={styles.toolbar}>
       <form className={styles.filters} action={filterApplications}>
         <label>状態<select name="status" defaultValue={filters.status ?? ""}><option value="">すべて</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>

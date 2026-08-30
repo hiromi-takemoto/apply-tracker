@@ -1,0 +1,20 @@
+.page { min-height: 100vh; padding: 32px 20px; }
+.panel { width: min(1120px, 100%); min-width: 0; margin: 0 auto; padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.heading p { margin-top: 8px; color: #35453b; }
+.back { color: var(--primary); font-weight: 700; }
+.tableScroll { max-width: 100%; margin-top: 26px; overflow-x: auto; border: 1px solid var(--border); border-radius: 7px; }
+.tableScroll table { width: 100%; min-width: 680px; border-collapse: collapse; }
+.tableScroll th, .tableScroll td { padding: 13px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tableScroll th { background: #e6ece8; white-space: nowrap; }
+.tableScroll tbody tr:last-child td { border-bottom: 0; }
+.empty, .error { margin-top: 26px; padding: 24px; border-radius: 7px; }
+.empty { text-align: center; line-height: 1.8; background: var(--background); border: 1px dashed var(--border); }
+.error { color: var(--danger); background: #fff1f1; border-left: 4px solid var(--danger); font-weight: 650; }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 26px; }
+.card { padding: 22px; background: var(--background); border: 1px solid var(--border); border-radius: 7px; }
+.card dt { color: #35453b; font-weight: 700; }
+.card dd { margin-top: 6px; font-size: 2rem; font-weight: 750; }
+.statusHeading { margin-top: 30px; }
+.page :focus-visible { outline: 3px solid #f1b51c; outline-offset: 2px; }
+@media (max-width: 650px) { .page { padding: 16px 10px; } .panel { padding: 18px 14px; } .heading { flex-direction: column; } .cards { grid-template-columns: 1fr; } }

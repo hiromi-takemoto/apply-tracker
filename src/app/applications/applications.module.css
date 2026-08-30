@@ -5,6 +5,7 @@
 .header p, .help { color: #35453b; overflow-wrap: anywhere; }
 .help { margin-top: 8px; }
 .headerActions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.headerActions > a:not(.primaryLink) { color: var(--primary); font-weight: 700; }
 .headerActions form { display: contents; }
 .primaryLink, .logout { border-radius: 6px; padding: 10px 15px; font-weight: 700; text-decoration: none; }
 .primaryLink { color: #fff; background: var(--primary); border: 1px solid var(--primary); }
