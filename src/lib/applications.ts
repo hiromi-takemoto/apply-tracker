@@ -48,12 +48,16 @@ export function formatYen(value: number | string): string {
   return Number.isFinite(amount) ? `${amountFormatter.format(amount)}円` : "";
 }
 
-export function genreLabel(major: GenreMajor | null, minor: string | null): string {
-  if (!major || !(major in GENRE_LABELS)) return "—";
+export function genreParts(
+  major: GenreMajor | null,
+  minor: string | null,
+): { major: string | null; minor: string | null } {
+  if (!major || !(major in GENRE_LABELS)) return { major: null, minor: null };
   const minorLabels = GENRE_MINOR_OPTIONS[major] as Record<string, string>;
-  return minor && minor in minorLabels
-    ? `${GENRE_LABELS[major]} / ${minorLabels[minor]}`
-    : GENRE_LABELS[major];
+  return {
+    major: GENRE_LABELS[major],
+    minor: minor && minor in minorLabels ? minorLabels[minor] : null,
+  };
 }
 
 export type ApplicationInput = {

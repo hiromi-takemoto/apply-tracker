@@ -39,3 +39,18 @@
 .page :focus-visible { outline: 3px solid #f1b51c; outline-offset: 2px; }
 @media (max-width: 760px) { .toolbar { align-items: stretch; flex-direction: column; } .filterActions { justify-content: space-between; } }
 @media (max-width: 650px) { .page { padding: 16px 10px; } .panel { padding: 18px 14px; } .header { flex-direction: column; } .headerActions { width: 100%; } .filters { display: grid; grid-template-columns: minmax(0, 1fr); } .filters label { min-width: 0; } .filters button { width: 100%; } .confirm { left: 20px; transform: none; } }
+
+.genreMajor,
+.genreMinor { display: block; white-space: nowrap; }
+.genreMinor { margin-top: 2px; font-size: 0.85em; color: #35453b; }
+
+/* 短い値の列は途中で折り返さない。表は入れ物の中で横スクロールするので広がってよい */
+.tableScroll th,
+.tableScroll td { white-space: nowrap; }
+/* タイトルだけは長くなるので折り返しを許す */
+.tableScroll th:nth-child(2),
+.tableScroll td:nth-child(2) { white-space: normal; min-width: 9em; }
+/* 操作列は常に右端に貼り付けて、横スクロールしても押せるようにする */
+.tableScroll th:last-child,
+.tableScroll td:last-child { position: sticky; right: 0; background: #fff; }
+.tableScroll thead th:last-child { background: #e6ece8; }
