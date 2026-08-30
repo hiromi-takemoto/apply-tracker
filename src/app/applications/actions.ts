@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { validateApplication } from "@/lib/applications";
+import { nonEmptySearchQuery } from "@/lib/application-filters";
 
 export type FormState = { errors: Record<string, string>; message?: string };
 
@@ -11,6 +12,15 @@ export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+export async function filterApplications(formData: FormData) {
+  const query = nonEmptySearchQuery({
+    status: String(formData.get("status") ?? ""),
+    platform: String(formData.get("platform") ?? ""),
+    genre: String(formData.get("genre") ?? ""),
+  });
+  redirect(`/applications${query ? `?${query}` : ""}`);
 }
 
 async function authenticatedClient() {

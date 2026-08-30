@@ -6,5 +6,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/applications/:path*"],
+  matcher: ["/login", "/reset-password", "/update-password", "/applications/:path*"],
 };

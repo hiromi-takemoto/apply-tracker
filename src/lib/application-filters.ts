@@ -46,6 +46,14 @@ export function applicationFiltersQuery(filters: ApplicationFilters): string {
   return params.toString();
 }
 
+export function nonEmptySearchQuery(values: Record<string, string>): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(values)) {
+    if (value !== "") params.set(key, value);
+  }
+  return params.toString();
+}
+
 type FilterableQuery<T> = { eq(column: string, value: string): T };
 
 export function applyApplicationFilters<T extends FilterableQuery<T>>(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseApplicationFilters } from "../src/lib/application-filters";
+import { nonEmptySearchQuery, parseApplicationFilters } from "../src/lib/application-filters";
 
 describe("案件一覧の絞り込み条件", () => {
   it("正しい英字キーだけを読み取る", () => {
@@ -16,5 +16,15 @@ describe("案件一覧の絞り込み条件", () => {
 
   it("同じキーが複数ある場合も先頭の正しい値を読む", () => {
     expect(parseApplicationFilters({ status: ["contracted", "rejected"] })).toEqual({ status: "contracted" });
+  });
+});
+
+describe("絞り込みURL", () => {
+  it("空の項目をURLパラメータに含めない", () => {
+    expect(nonEmptySearchQuery({ status: "applied", platform: "", genre: "" })).toBe("status=applied");
+  });
+
+  it("すべて空ならクエリ文字列も空にする", () => {
+    expect(nonEmptySearchQuery({ status: "", platform: "", genre: "" })).toBe("");
   });
 });

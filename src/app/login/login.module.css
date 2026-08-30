@@ -10,6 +10,8 @@
 .forms button { margin-top: 10px; border: 0; border-radius: 6px; padding: 11px 16px; color: #fff; background: var(--primary); font-weight: 700; cursor: pointer; }
 .forms button:hover { background: var(--primary-hover); }
 .forms button:disabled { background: #4f6257; cursor: wait; }
+.forgotLink { align-self: flex-start; color: var(--primary); font-weight: 700; }
+.forgotLink:focus-visible { outline: 3px solid #f1b51c; outline-offset: 2px; }
 .error, .success { margin-top: 8px; border-left: 4px solid; padding: 10px 12px; font-weight: 600; line-height: 1.5; }
 .error { color: var(--danger); background: #fff1f1; border-color: var(--danger); }
 .success { color: var(--success); background: #eef9f1; border-color: var(--success); }

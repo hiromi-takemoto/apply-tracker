@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatYen, genreParts, GENRE_LABELS, PLATFORM_LABELS, STATUS_LABELS, type ApplicationPlatform, type ApplicationStatus, type GenreMajor } from "@/lib/applications";
 import { applyApplicationFilters, applicationFiltersQuery, parseApplicationFilters, type FilterSearchParams } from "@/lib/application-filters";
-import { logout } from "./actions";
+import { filterApplications, logout } from "./actions";
 import { DeleteControl } from "./delete-control";
 import styles from "./applications.module.css";
 
@@ -46,7 +46,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
   return <main className={styles.page}><section className={styles.panel}>
     <header className={styles.header}><div><h1>案件一覧</h1><p>ログイン中: <strong>{user.email}</strong></p></div><div className={styles.headerActions}><Link className={styles.primaryLink} href="/applications/new">新規登録</Link><form action={logout}><button className={styles.logout} type="submit">ログアウト</button></form></div></header>
     <div className={styles.toolbar}>
-      <form className={styles.filters} method="get">
+      <form className={styles.filters} action={filterApplications}>
         <label>状態<select name="status" defaultValue={filters.status ?? ""}><option value="">すべて</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label>媒体<select name="platform" defaultValue={filters.platform ?? ""}><option value="">すべて</option>{Object.entries(PLATFORM_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label>ジャンル大区分<select name="genre" defaultValue={filters.genre ?? ""}><option value="">すべて</option>{Object.entries(GENRE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>

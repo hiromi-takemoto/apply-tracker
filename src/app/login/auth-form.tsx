@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { login, signup, type AuthState } from "./actions";
 import styles from "./login.module.css";
 
@@ -10,7 +11,7 @@ function SubmitButton({ label, pending }: { label: string; pending: boolean }) {
   return <button disabled={pending}>{pending ? "処理中…" : label}</button>;
 }
 
-export function AuthForm() {
+export function AuthForm({ passwordUpdated = false }: { passwordUpdated?: boolean }) {
   const [loginState, loginAction, loginPending] = useActionState(login, initialState);
   const [signupState, signupAction, signupPending] = useActionState(signup, initialState);
 
@@ -23,7 +24,9 @@ export function AuthForm() {
           <input id="login-email" name="email" type="email" autoComplete="email" required />
           <label htmlFor="login-password">パスワード</label>
           <input id="login-password" name="password" type="password" autoComplete="current-password" required />
+          <Link className={styles.forgotLink} href="/reset-password">パスワードをお忘れですか</Link>
           <SubmitButton label="ログイン" pending={loginPending} />
+          {passwordUpdated && <p className={styles.success} role="status">パスワードを更新しました。新しいパスワードでログインしてください。</p>}
           <Message state={loginState} />
         </form>
       </section>
