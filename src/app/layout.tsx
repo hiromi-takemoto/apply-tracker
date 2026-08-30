@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "クラウドソーシング案件の応募管理",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
       <body><SiteHeader />{children}</body>
