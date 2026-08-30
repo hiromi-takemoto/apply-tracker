@@ -1,5 +1,5 @@
 .page { min-height: 100vh; padding: 32px 20px; }
-.panel { width: min(1120px, 100%); margin: 0 auto; padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.panel { width: min(1120px, 100%); min-width: 0; margin: 0 auto; padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
 .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
 .header h1 { margin-bottom: 8px; }
 .header p, .help { color: #35453b; overflow-wrap: anywhere; }
@@ -10,7 +10,7 @@
 .primaryLink { color: #fff; background: var(--primary); border: 1px solid var(--primary); }
 .logout { color: var(--foreground); background: var(--surface); border: 1px solid var(--border); cursor: pointer; }
 .tableScroll { max-width: 100%; margin-top: 26px; overflow-x: auto; border: 1px solid var(--border); border-radius: 7px; }
-.tableScroll table { width: 100%; min-width: 790px; border-collapse: collapse; }
+.tableScroll table { width: 100%; min-width: 1040px; border-collapse: collapse; }
 .tableScroll th, .tableScroll td { padding: 13px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
 .tableScroll th { background: #e6ece8; white-space: nowrap; }
 .tableScroll tbody tr:last-child td { border-bottom: 0; }

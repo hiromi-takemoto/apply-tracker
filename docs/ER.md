@@ -25,7 +25,10 @@ erDiagram
         application_platform platform
         text title
         text listing_url
-        text listed_amount_text
+        text genre_major
+        text genre_minor
+        numeric listed_amount_min
+        numeric listed_amount_max
         numeric actual_amount
         integer applicant_count
         numeric client_rating
