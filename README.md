@@ -68,6 +68,27 @@ npm test
 
 RLS統合テストは、確認済みのユーザーA/Bを一時作成し、Aの案件をBが参照・更新・削除できないことと、A自身は参照できることを検証します。終了時は成功・失敗を問わず、作成した行とユーザーを削除します。必要な環境変数が未設定なら、テスト結果には失敗ではなくスキップと表示されます。
 
+### E2Eテスト（ローカル）
+
+`.env.local` に上記3つのSupabase接続情報を設定し、初回だけChromiumをインストールしてから実行します。開発サーバーはPlaywrightが自動起動します。
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+E2Eでは `SUPABASE_SERVICE_ROLE_KEY` を使って衝突しないメールアドレスの確認済みユーザーを作成し、終了時にそのユーザーを削除します。接続情報がない場合、6本のE2Eは失敗せずスキップされます。
+
+### GitHub ActionsのSecrets
+
+リポジトリの **Settings > Secrets and variables > Actions > New repository secret** を開き、次の3件をそれぞれ登録します。
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+`SUPABASE_SERVICE_ROLE_KEY` はRLSを迂回できる強い秘密鍵です。画面側のコードやログへ出さず、GitHub Secrets以外へ記載しないでください。CIはSecretsがなくてもlint・型チェック・ビルド・単体テストを実行し、3件が揃う場合だけRLS統合テストとE2Eを実行します。GitHubはフォーク元リポジトリのSecretsをフォークからのPRへ渡さないため、その種のPRでは秘密鍵を使うテストがスキップされる設計です。
+
 品質チェックは次のコマンドで実行します。
 
 ```bash
@@ -84,7 +105,7 @@ npm run build
 
 ## 現在の制約
 
-Playwright E2E、CI、Vercel公開は今後の周で実装します。スクレイピング、集計値以外の統計、AI生成、チーム共有、通知、PWA、決済、ダークモード、画像、多言語対応は仕様上の対象外です。
+Vercel公開は今後の周で実装します。スクレイピング、集計値以外の統計、AI生成、チーム共有、通知、PWA、決済、ダークモード、画像、多言語対応は仕様上の対象外です。
 
 ## 検証記録（1周目・2026-08-29）
 
@@ -321,3 +342,48 @@ Claudeがブラウザと実DBで、実在の募集データを使って確認し
 | コントラスト比（/admin 24箇所・/history） | OK 基準未満0件（最低 7.86） |
 | 画面幅375px（両画面） | OK はみ出さない |
 | 検証データの後始末 | OK 検証用ユーザー2つとログを削除 |
+
+## 検証記録（5周目・E2EテストとCI・2026-08-30）
+
+### E2Eテスト（実際にブラウザを動かして実行）
+
+```
+Running 6 tests using 1 worker
+  ok 1  未ログインで /applications を開くと /login へ飛ばされる      (2.6s)
+  ok 2  ログイン、案件作成、一覧表示、編集、反映、削除ができる        (10.9s)
+  ok 3  削除確認を取り消すと案件は消えない                          (4.9s)
+  ok 4  未保存の変更がある状態で離脱すると確認が出る                 (2.9s)
+  ok 5  絞り込むとURLに条件が入り件数表示が変わる                    (7.2s)
+  ok 6  パスワード再設定は登録済みと未登録で同じ文言を返す            (3.9s)
+  6 passed (54.6s)
+```
+
+| 確認項目 | 結果 |
+|---|---|
+| E2E 6本 | OK 全通過（54.6秒） |
+| 既存のVitest 31件 | OK 壊れていない |
+| lint / tsc / build | OK |
+| **E2Eのテストユーザーの後始末** | OK 自動で削除されている（残りかす0件） |
+| .gitignore | OK playwright-report / test-results / .playwright を追加 |
+
+### 6本目で分かったこと（想定外の収穫）
+
+E2E実行中、サーバーのログにこれが出た。
+
+```
+Password reset email request failed AuthApiError: Email address "e2e-...@example.com" is invalid
+```
+
+Supabaseが実際にエラーを返していたが、**テストは合格した**。
+つまり `supabase-error` の経路でも画面には同じ文言が出ている、という
+**設計どおりの動作が偶然に実証された**。エラーはサーバーログにだけ出て、画面には出ていない。
+
+### CI（.github/workflows/ci.yml）
+
+| 確認項目 | 結果 |
+|---|---|
+| 秘密の値の直書き | OK なし。すべて secrets 経由 |
+| Secretsが無くても動く | lint / tsc --noEmit / build / vitest |
+| Secretsがあるときだけ動く | RLS統合テスト / E2E |
+| 失敗時のレポート保存 | OK playwright-report をアップロード |
+| **実際にCIが緑になるかの確認** | **未実施（GitHubにリポジトリを置いてから。6周目）** |
