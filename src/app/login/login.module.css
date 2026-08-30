@@ -1,8 +1,6 @@
-.page { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; }
+.page { display: grid; place-items: center; padding: 32px 20px; }
 .container { width: min(760px, 100%); }
-.container > h1 { font-size: 2rem; }
-.lead { margin-top: 8px; color: #35453b; }
-.forms { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 28px; }
+.forms { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 .forms section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
 .forms h2 { font-size: 1.25rem; margin-bottom: 20px; }
 .forms form { display: flex; flex-direction: column; gap: 9px; }

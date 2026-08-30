@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import {
   formatYen,
   GENRE_LABELS,
@@ -10,6 +10,7 @@ import {
   STATUS_LABELS,
   type GenreMajor,
 } from "@/lib/applications";
+import { hasFormChanged, snapshotForm, type FormEntry } from "@/lib/form-dirty";
 import type { FormState } from "./actions";
 import styles from "./form.module.css";
 
@@ -31,13 +32,88 @@ export function ApplicationForm({ action, values = {}, submitLabel }: { action: 
   const [actualAmount, setActualAmount] = useState(field("actual_amount"));
   const [genreMajor, setGenreMajor] = useState(field("genre_major"));
   const [genreMinor, setGenreMinor] = useState(field("genre_minor"));
+  const formRef = useRef<HTMLFormElement>(null);
+  const continueButtonRef = useRef<HTMLButtonElement>(null);
+  const initialSnapshot = useRef<FormEntry[] | null>(null);
+  const wasPending = useRef(false);
+  const [dirty, setDirty] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [destination, setDestination] = useState<string | null>(null);
   const error = (name: string) => state.errors[name] ? <p className={styles.error} id={`${name}-error`}>{state.errors[name]}</p> : null;
   const described = (name: string, readout?: string) => [readout, state.errors[name] ? `${name}-error` : ""].filter(Boolean).join(" ") || undefined;
   const minorOptions: Record<string, string> = genreMajor in GENRE_MINOR_OPTIONS
     ? GENRE_MINOR_OPTIONS[genreMajor as GenreMajor]
     : {};
 
-  return <form action={formAction} className={styles.form} noValidate>
+  useEffect(() => {
+    if (formRef.current && initialSnapshot.current === null) {
+      initialSnapshot.current = snapshotForm(formRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (pending) wasPending.current = true;
+    if (!pending && wasPending.current) {
+      wasPending.current = false;
+      setSubmitting(false);
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (!dirty || submitting) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const internalLink = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target instanceof Element ? event.target.closest("a") : null;
+      if (!(target instanceof HTMLAnchorElement) || target.target === "_blank" || target.hasAttribute("download")) return;
+      const url = new URL(target.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      event.preventDefault();
+      setDestination(url.href);
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    document.addEventListener("click", internalLink, true);
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+      document.removeEventListener("click", internalLink, true);
+    };
+  }, [dirty, submitting]);
+
+  useEffect(() => {
+    if (!destination) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const continueEditing = () => setDestination(null);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") continueEditing();
+    };
+
+    document.body.style.overflow = "hidden";
+    continueButtonRef.current?.focus();
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [destination]);
+
+  const checkDirty = () => {
+    if (formRef.current && initialSnapshot.current) {
+      setDirty(hasFormChanged(initialSnapshot.current, snapshotForm(formRef.current)));
+    }
+  };
+
+  const leave = () => {
+    if (!destination) return;
+    setSubmitting(true);
+    window.location.assign(destination);
+  };
+
+  return <form ref={formRef} action={formAction} className={styles.form} noValidate onChange={checkDirty} onSubmit={() => { setSubmitting(true); setDestination(null); }}>
     {state.message && <p className={styles.summary} role="alert">{state.message}</p>}
     <div className={styles.grid}>
       <label>媒体 <span>必須</span><select name="platform" defaultValue={field("platform")} aria-describedby={described("platform")} required><option value="">選択してください</option>{Object.entries(PLATFORM_LABELS).map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select>{error("platform")}</label>
@@ -63,5 +139,11 @@ export function ApplicationForm({ action, values = {}, submitLabel }: { action: 
       <label className={styles.wide}>メモ（なぜ落ちたか等）<textarea name="memo" rows={5} defaultValue={field("memo")} /></label>
     </div>
     <div className={styles.actions}><button disabled={pending}>{pending ? "保存中…" : submitLabel}</button><Link href="/applications">取り消す</Link></div>
+    {destination && <div className={styles.leaveConfirmOverlay}>
+      <div className={styles.leaveConfirm} role="alertdialog" aria-modal="true" aria-labelledby="leave-confirm-title">
+        <p id="leave-confirm-title"><strong>このページを離れますか？変更は保存されません</strong></p>
+        <div><button type="button" onClick={leave}>離れる</button><button ref={continueButtonRef} type="button" className={styles.continueButton} onClick={() => setDestination(null)}>編集を続ける</button></div>
+      </div>
+    </div>}
   </form>;
 }

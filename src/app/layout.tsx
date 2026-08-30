@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { SiteHeader } from "./site-header";
 
 export const metadata: Metadata = {
   title: "ApplyTracker",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body><SiteHeader />{children}</body>
     </html>
   );
 }
