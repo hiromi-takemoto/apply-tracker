@@ -9,6 +9,15 @@
 .primaryLink, .logout { border-radius: 6px; padding: 10px 15px; font-weight: 700; text-decoration: none; }
 .primaryLink { color: #fff; background: var(--primary); border: 1px solid var(--primary); }
 .logout { color: var(--foreground); background: var(--surface); border: 1px solid var(--border); cursor: pointer; }
+.toolbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-top: 26px; padding: 18px; background: var(--background); border: 1px solid var(--border); border-radius: 7px; }
+.filters { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.filters label { display: grid; gap: 5px; min-width: 150px; color: var(--foreground); font-weight: 700; }
+.filters select { width: 100%; min-height: 42px; padding: 8px 30px 8px 9px; color: var(--foreground); background: var(--surface); border: 1px solid var(--border); border-radius: 5px; font: inherit; }
+.filters button, .csvLink { min-height: 42px; padding: 9px 14px; color: #fff; background: var(--primary); border: 1px solid var(--primary); border-radius: 5px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.filterActions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: 0 0 auto; }
+.filterActions > a:first-child { color: var(--primary); font-weight: 700; }
+.csvLink { display: inline-flex; align-items: center; }
+.count { margin-top: 16px; color: #35453b; font-weight: 700; }
 .tableScroll { max-width: 100%; margin-top: 26px; overflow-x: auto; border: 1px solid var(--border); border-radius: 7px; }
 .tableScroll table { width: 100%; min-width: 1040px; border-collapse: collapse; }
 .tableScroll th, .tableScroll td { padding: 13px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -28,4 +37,5 @@
 .empty { margin-top: 26px; padding: 30px; text-align: center; line-height: 1.8; border: 1px dashed var(--border); border-radius: 7px; background: var(--background); }
 .loadError { margin-top: 24px; padding: 12px; color: var(--danger); background: #fff1f1; border-left: 4px solid var(--danger); font-weight: 650; }
 .page :focus-visible { outline: 3px solid #f1b51c; outline-offset: 2px; }
-@media (max-width: 650px) { .page { padding: 16px 10px; } .panel { padding: 18px 14px; } .header { flex-direction: column; } .headerActions { width: 100%; } .confirm { left: 20px; transform: none; } }
+@media (max-width: 760px) { .toolbar { align-items: stretch; flex-direction: column; } .filterActions { justify-content: space-between; } }
+@media (max-width: 650px) { .page { padding: 16px 10px; } .panel { padding: 18px 14px; } .header { flex-direction: column; } .headerActions { width: 100%; } .filters { display: grid; grid-template-columns: minmax(0, 1fr); } .filters label { min-width: 0; } .filters button { width: 100%; } .confirm { left: 20px; transform: none; } }
