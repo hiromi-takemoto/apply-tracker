@@ -442,3 +442,59 @@ Supabaseが実際にエラーを返していたが、**テストは合格した*
 | Secretsがあるときだけ動く | RLS統合テスト / E2E |
 | 失敗時のレポート保存 | OK playwright-report をアップロード |
 | **実際にCIが緑になるかの確認** | **未実施（GitHubにリポジトリを置いてから。6周目）** |
+
+## 検証記録（6周目・公開・2026-08-31）
+
+### 本番環境（https://apply-tracker-self.vercel.app/）
+
+| パス | 結果 |
+|---|---|
+| `/` | 307 → `/login` |
+| `/login` `/reset-password` `/update-password` | 200（公開ページとして正しい） |
+| `/applications` `/applications/new` `/applications/history` `/admin` | **307 → `/login`** |
+| **`/applications/export`（CSVを直接叩く）** | **307 → `/login`。データは出力されない** |
+
+### 本番の配信ファイルに秘密の値が漏れていないか
+
+配信されているJavaScript **8ファイル・587,897バイト** とHTMLを全て取得して走査した。
+
+| 探した文字列 | 結果 |
+|---|---|
+| `sb_secret_` | OK 含まれない |
+| `SUPABASE_SERVICE_ROLE_KEY` | OK 含まれない |
+| `service_role` | OK 含まれない |
+
+### CI（GitHub Actions）
+
+| ステップ | 結果 |
+|---|---|
+| lint / tsc --noEmit / build / vitest 31件 | success |
+| **RLS統合テスト（実DB）** | success |
+| **E2Eテスト 6本（Playwright）** | success |
+| 総合 | **success（1分46秒）** |
+
+最初のCIは失敗した。原因は `next dev` が生成する `LayoutProps` 型に依存していたこと。
+**手元には過去のビルド生成物が残っていたため通っていたが、まっさらなCIでは落ちた。**
+props の型を明示して解消。生成物を消した状態を手元で再現してから修正を送った。
+
+### 完成の定義①「第三者がREADMEだけで起動できる」の検証
+
+**GitHubから別の場所にクローンし直して、READMEの手順だけで起動できるか確認した。**
+
+| 手順 | 結果 |
+|---|---|
+| `git clone` | OK 79ファイル |
+| `npm install` | OK 終了コード0 |
+| `.env.example` を `.env.local` にコピー | OK 必要な変数名が4つ揃っている |
+| `npm run build` | OK |
+| `npm test` | OK 31件通過 |
+| `npm run dev` → `http://localhost:3000/` | OK `/login` へリダイレクト、日本語が表示される |
+
+### デモアカウント
+
+| | |
+|---|---|
+| メールアドレス | `demo@example.com` |
+| パスワード | `demo1234` |
+| サンプルデータ | 7件（2026-08-29の調査で実在を確認した募集） |
+| **デモが自分を管理者に昇格できるか** | **OK できない**（`profiles` に更新権限を与えていないため） |
