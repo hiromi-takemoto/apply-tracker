@@ -1,5 +1,7 @@
 # ApplyTracker
 
+[![CI](https://github.com/hiromi-takemoto/apply-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/hiromi-takemoto/apply-tracker/actions/workflows/ci.yml)
+
 **クラウドソーシングの案件応募を記録・管理するWebアプリ**
 
 - 公開URL: **https://apply-tracker-self.vercel.app/**
